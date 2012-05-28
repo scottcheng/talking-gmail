@@ -1,0 +1,15 @@
+{
+  "extName": {
+    "message": "Talking Gmail",
+    "description": "Extension name"
+  },
+  "extDesc": {
+    "message": "",
+    "description": "Extension description"
+  },
+
+  "btnText": {
+  	"message": "Read this message",
+  	"description": "Text to display on the button"
+  }
+}
