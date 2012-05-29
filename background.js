@@ -12,6 +12,10 @@ var _gaq = _gaq || [];
 // })();
 
 var reqListeners = {
+  speak: function(opt) {
+    chrome.tts.speak(opt.utterance);
+  },
+
   visitMail: function(opt, sender) {
     _gaq.push(['_trackEvent', 'Mail', 'visit']);
   }
