@@ -1,4 +1,4 @@
-// Renren Album Downloader by Scott Cheng
+// Talking Gmail by Scott Cheng
 // Background script
 
 var _gaq = _gaq || [];
@@ -11,21 +11,40 @@ var _gaq = _gaq || [];
 //   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 // })();
 
-var reqListeners = {
-  speak: function(opt) {
-    chrome.tts.speak(opt.utterance);
-  },
+var msgListeners = {
+  speak: function(opt, port) {
+    chrome.tts.speak(opt.utterance, {
+      onEvent: function(e) {
+        if (e.type === 'end') {
+          port.postMessage({
+            e: 'end'
+          });
+        }
+      }
+    });
 
+  },
+  stopSpeaking: function() {
+    chrome.tts.stop();
+  }
+};
+
+var reqListeners = {
   visitMail: function(opt, sender) {
     _gaq.push(['_trackEvent', 'Mail', 'visit']);
   }
 };
 
-chrome.extension.onRequest.addListener(
-  function(req, sender, sendResponse) {
-    var func = reqListeners[req.e];
-    var ret = func(req.opt, sender);
-    if (ret) {
-      sendResponse();
-    }
+chrome.extension.onConnect.addListener(function(port) {
+  port.onMessage.addListener(function(msg) {
+    var func = msgListeners[msg.e];
+    func && func(msg.opt, port);
+  });
+});
+
+chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
+  var func = reqListeners[req.e];
+  var ret;
+  func && (ret = func(req.opt, sender));
+  ret && sendResponse(ret);
 });

@@ -1,0 +1,11 @@
+.talking-gmail-text {
+  -webkit-transition: color .3s ease-in-out;
+}
+
+.talking-gmail-reading {
+  color: #888;
+}
+
+.talking-gmail-highlight {
+  color: #000;
+}
