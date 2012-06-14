@@ -9,3 +9,9 @@
 .talking-gmail-highlight {
   color: #000;
 }
+
+#talking-gmail-controller {
+  position: absolute;
+  top: 0;
+  right: 390px;
+}

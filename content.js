@@ -5,7 +5,8 @@ var conf = {
   btnId: 'talking-gmail-btn',
   textClass: 'talking-gmail-text',
   readingClass: 'talking-gmail-reading',
-  hiltClass: 'talking-gmail-highlight'
+  hiltClass: 'talking-gmail-highlight',
+  ctrlerId: 'talking-gmail-controller'
 };
 
 var util = (function() {
@@ -18,11 +19,14 @@ var util = (function() {
   return obj;
 })();
 
-var TextObj = function() {
+var TextObj = function(text, id) {
   var priv = {
     ids: [],
     text: ''
   };
+
+  (text !== undefined) && (priv.text = text);
+  (id !== undefined) && priv.ids.push(id);
 
   this.addText = function(text) {
     priv.text += text + ' ';
@@ -41,6 +45,10 @@ var TextObj = function() {
   this.getIds = function() {
     return priv.ids;
   };
+
+  this.isEmpty = function() {
+    return priv.text.length === 0;
+  };
 };
 
 var view = (function() {
@@ -50,7 +58,7 @@ var view = (function() {
   var $menu;
   var $menuBtn;
   var $curHilt;  // Current highlit elements
-  var mailTexts = [];  // List of reformatted email text
+  var $ctrler;
 
   var mailId;
   var readMailList = [];  // A list of ids of the emails already read
@@ -62,6 +70,7 @@ var view = (function() {
     $frame.ready(function() {
       $frameContents = $frame.contents();
 
+      // Insert css
       $('<link />')
         .attr({
           rel: 'stylesheet',
@@ -70,6 +79,7 @@ var view = (function() {
         })
         .appendTo($frameContents.find('head'));
 
+      // Add menu item
       var menuBtnSel = 'div.T-I.J-J5-Ji.T-I-Js-Gs.aap.T-I-awG.T-I-ax7.L3';
       $frameContents.on('click', menuBtnSel, function() {
         $menuBtn = $(this);
@@ -83,18 +93,27 @@ var view = (function() {
         $menuBtn[0].dispatchEvent(evt);
 
         var $mailBody = findMailBody($menuBtn);
-        readMail($mailBody.children());
+        readMail($mailBody.children().filter(function() {
+          return !isQuoteEle($(this))
+        }));
       }).on('mouseover', '#' + conf.btnId, function() {
         $(this).addClass('J-N-JT');
       }).on('mouseleave', '#' + conf.btnId, function() {
         $(this).removeClass('J-N-JT');
       });
+
+      // Add controller
+      var $mailViewWrapper = $frameContents.find('.AO');
+      $ctrler = $('<div />')
+        .attr('id', conf.ctrlerId)
+        .html('test ctrler');
+      // $ctrler.appendTo($mailViewWrapper);
     });
 
-    window.onhashchange = function() {
-      clearHash();
-      reader.clearHash();
-    };
+    window.addEventListener('hashchange', function() {
+      onHashchange();
+      reader.onHashchange();
+    });
 
     return this;
   };
@@ -130,6 +149,7 @@ var view = (function() {
     reader.switchTo(mailId);
 
     if (readMailList.indexOf(mailId) >= 0) {
+      $mail.find('.' + conf.textClass).addClass(conf.readingClass);
       reader.readAgain(mailId);
       return;
     }
@@ -138,63 +158,113 @@ var view = (function() {
     reader.newMail(mailId);
 
     var $divs = $mail.children('div');
+    var isHTML = false;
     $divs.each(function(idx, ele) {
       var $ele = $(ele);
-      if (!$ele.hasClass('yj6qo') && !$ele.hasClass('adL')) {
-        // HTML
-        // readHTMLMail($mail);
-        return;
+      if (!isQuoteEle($ele)) {
+        isHTML = true;
+        return false;
       }
     });
 
-    // Plain text
-    readTextMail($mail);
-
-    // chrome.extension.sendRequest({
-    //   e: 'speak',
-    //   opt: {
-    //     utterance: $mail.text()
-    //   }
-    // });
+    isHTML ? readHTMLMail($mail) : readTextMail($mail);
   };
 
   var readTextMail = function($mail) {
-    var contents = $mail.contents().slice();
+    // Replace all text nodes with spans, and send them to reader
+    // Other elements are put back as they were
 
-    // Email unread
+    var contents = $mail.contents();
     $mail.empty();
 
     var textObj = new TextObj;
+    var endParagraph = function() {
+      if (!textObj.isEmpty()) {
+        reader.push(textObj);
+        textObj = new TextObj;
+      }
+    };
     var len = contents.length;
+    var bred = false;
     for (var i = 0; i < len; i++) {
       var node = contents[i];
 
       if (node.nodeName === "#text") {
+        bred = false;
         if ($.trim(node.data).length === 0) {
-          reader.push(textObj);
-          textObj = new TextObj;
+          endParagraph();
           continue;
         }
 
-        // Replace the text node with a span
-        var textEleId = util.getTextElementId(mailId, i);
+        var textEleId = getTextElementId();
         var $span = $('<span />')
           .attr('id', textEleId)
           .addClass(conf.readingClass + ' ' + conf.textClass)
           .html(node.data)
           .appendTo($mail);
-        mailTexts.push($span);
         textObj.addText(node.data);
         textObj.addId(textEleId);
       } else {
-        $(node).appendTo($mail);
+        var $node = $(node);
+        if ($node.is('br')) {
+          if (bred) {
+            endParagraph();
+            bred = false;
+          } else {
+            bred = true;
+          }
+        }
+        $node.appendTo($mail);
       }
     }
-    reader.push(textObj);
+    reader
+      .push(textObj)
+      .startReading();
   };
 
   var readHTMLMail = function($mail) {
-    // TODO
+    // DFS all nodes in $mail, replace text nodes with spans
+
+    var contents = $mail.contents();
+    var $newMail = $('<div />');
+
+    var dfs = function(ele, $parent, isLast) {
+      if (ele.nodeName === '#text') {
+        var textEleId = getTextElementId();
+        $('<span />')
+          .attr('id', textEleId)
+          .addClass(conf.readingClass + ' ' + conf.textClass)
+          .html(ele.data)
+          .appendTo($parent);
+        reader.push(new TextObj(ele.data, textEleId));
+      } else {
+        var $ele = $(ele);
+        if (isQuoteEle($ele) || !$ele.is(':visible')) {
+          // Mute this node
+          $ele.appendTo($parent);
+        } else {
+          // Audible node, go on with dfs
+          var eleContents = $ele.contents();
+          var $newParent = $ele.clone().empty().appendTo($parent);
+          var len = eleContents.length;
+          for (var i = 0; i < len; i++) {
+            dfs(eleContents[i], $newParent);
+          }
+        }
+      }
+      if (isLast) {
+        $mail
+          .empty()
+          .append($newMail.children());
+        reader.startReading();
+      }
+    };
+
+    var len = contents.length;
+    for (var i = 0; i < len - 1; i++) {
+      dfs(contents[i], $newMail);
+    }
+    dfs(contents[len - 1], $newMail, true);
   };
 
   obj.highlight = function(ids) {
@@ -209,18 +279,34 @@ var view = (function() {
     return this;
   };
 
-  var clearHash = function() {
+  var onHashchange = function() {
     readMailList = [];
   };
 
-  obj.clearMail = function() {
-    var len = mailTexts.length;
-    for (var i = 0; i < len; i++) {
-      mailTexts[i].removeClass(conf.hiltClass + ' ' + conf.readingClass);
-    }
-    mailTexts = [];
+  obj.finishMail = function() {
+    $frameContents.find('.' + conf.hiltClass).removeClass(conf.hiltClass);
+    $frameContents.find('.' + conf.readingClass).removeClass(conf.readingClass);
     return this;
   };
+
+  var isQuoteEle = function($ele) {
+    if ($ele.hasClass('yj6qo') || $ele.hasClass('adL') || $ele.hasClass('im')) {
+      return true;
+    } else if ($ele.is('div')) {
+      var $children = $ele.children();
+      if ($children.length === 2 && $children.is('.adm') && $children.is('.h5')) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  var getTextElementId = (function() {
+    var i = 0;
+    return function() {
+      return conf.textClass + (i++);
+    };
+  })();
 
   return obj;
 })();
@@ -271,7 +357,7 @@ var reader = (function() {
 
   var finish = function() {
     isReading = false;
-    view.clearMail();
+    view.finishMail();
   };
 
   obj.switchTo = function(mailId) {
@@ -281,6 +367,11 @@ var reader = (function() {
   };
 
   obj.readAgain = function() {
+    return this.startReading();
+  };
+
+  obj.startReading = function() {
+    initPort();
     readQueue(0);
     return this;
   };
@@ -292,11 +383,7 @@ var reader = (function() {
   };
 
   obj.push = function(textObj) {
-    initPort();
     queues[curMailId].push(textObj);
-    if (!isReading) {
-      readQueue();
-    }
     return this;
   };
 
@@ -310,14 +397,16 @@ var reader = (function() {
   };
 
   obj.next = function() {
+    // TODO
     return this;
   };
 
   obj.prev = function() {
+    // TODO
     return this;
   };
 
-  obj.clearHash = function() {
+  obj.onHashchange = function() {
     queues = {};
     curMailId = null;
     this.stop();
