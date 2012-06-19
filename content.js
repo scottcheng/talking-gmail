@@ -6,7 +6,18 @@ var conf = {
   textClass: 'talking-gmail-text',
   readingClass: 'talking-gmail-reading',
   hiltClass: 'talking-gmail-highlight',
-  ctrlerId: 'talking-gmail-controller'
+  ctrlerWrapperId: 'talking-gmail-controller-wrapper',
+  ctrlerId: 'talking-gmail-controller',
+  btnWrapperId: 'talking-gmail-controller-btn-wrapper',
+  btnClass: 'T-I J-J5-Ji T-I-awG T-I-ax7',
+  btnLeftClass: 'T-I-Js-IF',
+  btnRightClass: 'T-I-Js-Gs',
+  btnHoverClass: 'T-I-JW',
+  prevBtnId: 'talking-gmail-controller-prev-btn',
+  nextBtnId: 'talking-gmail-controller-next-btn',
+  pauseBtnId: 'talking-gmail-controller-pause-btn',
+  stopBtnId: 'talking-gmail-controller-stop-btn',
+  ctrlerLogoId: 'talking-gmail-controller-logo'
 };
 
 var util = (function() {
@@ -58,7 +69,6 @@ var view = (function() {
   var $menu;
   var $menuBtn;
   var $curHilt;  // Current highlit elements
-  var $ctrler;
 
   var mailId;
   var readMailList = [];  // A list of ids of the emails already read
@@ -101,13 +111,6 @@ var view = (function() {
       }).on('mouseleave', '#' + conf.btnId, function() {
         $(this).removeClass('J-N-JT');
       });
-
-      // Add controller
-      var $mailViewWrapper = $frameContents.find('.AO');
-      $ctrler = $('<div />')
-        .attr('id', conf.ctrlerId)
-        .html('test ctrler');
-      // $ctrler.appendTo($mailViewWrapper);
     });
 
     window.addEventListener('hashchange', function() {
@@ -236,7 +239,9 @@ var view = (function() {
           .addClass(conf.readingClass + ' ' + conf.textClass)
           .html(ele.data)
           .appendTo($parent);
-        reader.push(new TextObj(ele.data, textEleId));
+        if ($.trim(ele.data).length > 0) {
+          reader.push(new TextObj(ele.data, textEleId));
+        }
       } else {
         var $ele = $(ele);
         if (isQuoteEle($ele) || !$ele.is(':visible')) {
@@ -281,11 +286,13 @@ var view = (function() {
 
   var onHashchange = function() {
     readMailList = [];
+    view.ctrler.remove();
   };
 
-  obj.finishMail = function() {
-    $frameContents.find('.' + conf.hiltClass).removeClass(conf.hiltClass);
-    $frameContents.find('.' + conf.readingClass).removeClass(conf.readingClass);
+  obj.clearHighlight = function() {
+    $frameContents.find('.' + conf.textClass)
+      .removeClass(conf.hiltClass)
+      .removeClass(conf.readingClass);
     return this;
   };
 
@@ -308,6 +315,110 @@ var view = (function() {
     };
   })();
 
+  obj.ctrler = (function() {
+    var obj = {};
+    var $wrapper;
+    var $ctrler;
+    var $logo;
+    var $prevBtn;
+    var $nextBtn;
+    var $pauseBtn;
+    var $stopBtn;
+    var isPaused = false;
+
+    var addController = function() {
+      var self = this;
+      var $mailViewWrapper = $frameContents.find('.AO');
+      $wrapper = $('<div />')
+        .attr('id', conf.ctrlerWrapperId);
+      $ctrler = $('<div />')
+        .attr('id', conf.ctrlerId)
+        .appendTo($wrapper);
+      var $btnWrapper = $('<div />')
+        .attr('id', conf.btnWrapperId)
+        .appendTo($ctrler);
+      $prevBtn = $('<div />')
+        .html('pr')
+        .addClass(conf.btnClass)
+        .addClass(conf.btnLeftClass)
+        .attr('id', conf.prevBtnId)
+        .appendTo($btnWrapper);
+      $stopBtn = $('<div />')
+        .html('st')
+        .addClass(conf.btnClass)
+        .addClass(conf.btnLeftClass)
+        .addClass(conf.btnRightClass)
+        .attr('id', conf.stopBtnId)
+        .appendTo($btnWrapper);
+      $pauseBtn = $('<div />')
+        .html('ps')
+        .addClass(conf.btnClass)
+        .addClass(conf.btnLeftClass)
+        .addClass(conf.btnRightClass)
+        .attr('id', conf.pauseBtnId)
+        .appendTo($btnWrapper);
+      $nextBtn = $('<div />')
+        .html('nx')
+        .addClass(conf.btnClass)
+        .addClass(conf.btnRightClass)
+        .attr('id', conf.nextBtnId)
+        .appendTo($btnWrapper);
+
+      $logo = $('<div />')
+        .attr('id', conf.ctrlerLogoId)
+        .html('Talking Gmail')
+        .appendTo($ctrler);
+
+      $wrapper.hover(function() {
+        $(this).addClass('expanded');
+      }, function() {
+        if (!isPaused) {
+          $(this).removeClass('expanded');
+        }
+      })
+      $wrapper.find('.T-I').hover(function() {
+        $(this).addClass(conf.btnHoverClass);
+      }, function() {
+        $(this).removeClass(conf.btnHoverClass);
+      });
+
+      $wrapper.on('click', '#' + conf.prevBtnId, function() {
+        reader.prev();
+      }).on('click', '#' + conf.nextBtnId, function() {
+        reader.next();
+      }).on('click', '#' + conf.pauseBtnId, function() {
+        var $this = $(this);
+        if (isPaused) {
+          isPaused = false;
+          $this.removeClass('paused');
+          reader.resume();
+        } else {
+          isPaused = true;
+          $this.addClass('paused');
+          reader.pause();
+        }
+      }).on('click', '#' + conf.stopBtnId, function() {
+        reader.stop();
+      });
+
+      $wrapper.appendTo($mailViewWrapper);
+      return this;
+    };
+
+    obj.show = function() {
+      $wrapper || addController.call(this);
+      $wrapper.addClass('visible');
+      return this;
+    };
+
+    obj.remove = function() {
+      $wrapper && $wrapper.removeClass('expanded visible');
+      return this;
+    };
+
+    return obj;
+  })();
+
   return obj;
 })();
 
@@ -321,7 +432,11 @@ var reader = (function() {
   var isReading = false;
 
   var readQueue = function(idx) {
-    (idx !== undefined) || (idx = queues[curMailId].pos);
+    if (idx !== undefined) {
+      queues[curMailId].pos = idx;
+    } else {
+      idx = queues[curMailId].pos;
+    }
     var textObj = queues[curMailId][idx];
     if (textObj) {
       isReading = true;
@@ -332,7 +447,6 @@ var reader = (function() {
         }
       });
       view.highlight(textObj.getIds());
-      queues[curMailId].pos = idx + 1;
     } else {
       finish();
     }
@@ -344,33 +458,39 @@ var reader = (function() {
       port = chrome.extension.connect();
       port.onMessage.addListener(function(msg) {
         if (msg.e === 'end') {
-          end();
-          readQueue();
+          onEnd();
+          readQueue(queues[curMailId].pos + 1);
         }
       });
     }
   };
 
-  var end = function() {
+  var onEnd = function() {
+    // on finishing speaking an item
     isReading = false;
   };
 
   var finish = function() {
+    // Finish an mail
+    view.ctrler.remove();
     isReading = false;
-    view.finishMail();
+    view.clearHighlight();
   };
 
   obj.switchTo = function(mailId) {
+    // Switch to a new mail
     this.stop();
     curMailId = mailId;
     return this;
   };
 
   obj.readAgain = function() {
+    // Read the same mail again
     return this.startReading();
   };
 
   obj.startReading = function() {
+    view.ctrler.show();
     initPort();
     readQueue(0);
     return this;
@@ -388,21 +508,42 @@ var reader = (function() {
   };
 
   obj.stop = function() {
-    initPort();
+    // Force stop
+    this.pause();
     finish();
+    return this;
+  };
+
+  obj.pause = function() {
+    initPort();
+    isReading = false;
     port.postMessage({
       e: 'stopSpeaking'
     });
     return this;
   };
 
+  obj.resume = function() {
+    readQueue();
+    return this;
+  };
+
   obj.next = function() {
-    // TODO
+    var len = queues[curMailId].length;
+    var idx = queues[curMailId].pos + 1;
+    if (idx < len) {
+      this.pause();
+      readQueue(idx);
+    }
     return this;
   };
 
   obj.prev = function() {
-    // TODO
+    var idx = queues[curMailId].pos - 1;
+    if (idx >= 0) {
+      this.pause();
+      readQueue(idx);
+    }
     return this;
   };
 
