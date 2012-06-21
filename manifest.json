@@ -27,7 +27,17 @@
     }
   ],
   "web_accessible_resources": [
-    "style.css"
+    "style.css",
+    "ui/prev.png",
+    "ui/prev_lt.png",
+    "ui/next.png",
+    "ui/next_lt.png",
+    "ui/stop.png",
+    "ui/stop_lt.png",
+    "ui/pause.png",
+    "ui/pause_lt.png",
+    "ui/play.png",
+    "ui/play_lt.png"
   ],
   "default_locale": "en",
   "icons": {

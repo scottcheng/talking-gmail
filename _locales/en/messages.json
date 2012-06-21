@@ -8,8 +8,29 @@
     "description": "Extension description"
   },
 
-  "btnText": {
+  "menuBtnText": {
   	"message": "Read this message",
-  	"description": "Text to display on the button"
+  	"description": "Text to display on the menu button"
+  },
+
+  "btnTooltipPrev": {
+    "message": "Previous",
+    "description": "Tooltip on the controller previous button"
+  },
+  "btnTooltipStop": {
+    "message": "Stop",
+    "description": "Tooltip on the controller stop button"
+  },
+  "btnTooltipPause": {
+    "message": "Pause",
+    "description": "Tooltip on the controller pause button"
+  },
+  "btnTooltipResume": {
+    "message": "Resume",
+    "description": "Tooltip on the controller resume button"
+  },
+  "btnTooltipNext": {
+    "message": "Next",
+    "description": "Tooltip on the controller next button"
   }
 }

@@ -26,7 +26,7 @@
 }
 
 #talking-gmail-controller-wrapper.expanded {
-  height: 65px;
+  height: 66px;
 }
 
 #talking-gmail-controller {
@@ -39,34 +39,60 @@
   box-shadow: 0 0 5px rgba(0, 0, 0, .25);
   background-color: rgba(255, 255, 255, 0.75);
   z-index: 10;
+  -webkit-user-select: none;
 }
 
 #talking-gmail-controller-btn-wrapper {
-  margin: 3px 6px;
+  margin: 3px 6px 0;
 }
 
-#talking-gmail-controller-btn-wrapper div:last-child {
+#talking-gmail-controller-btn-wrapper div.T-I:last-child {
   margin-right: 0;
 }
 
-#talking-gmail-controller-prev-btn {
+#talking-gmail-controller-btn-wrapper div.T-I {
+  background-position: 8px 4px;
+  background-repeat: no-repeat;
+}
 
+#talking-gmail-controller-prev-btn {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/prev_lt.png);
+}
+
+#talking-gmail-controller-prev-btn:hover {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/prev.png);
 }
 
 #talking-gmail-controller-next-btn {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/next_lt.png);
+}
 
+#talking-gmail-controller-next-btn:hover {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/next.png);
 }
 
 #talking-gmail-controller-stop-btn {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/stop_lt.png);
+}
 
+#talking-gmail-controller-stop-btn:hover {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/stop.png);
 }
 
 #talking-gmail-controller-pause-btn {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/pause_lt.png);
+}
 
+#talking-gmail-controller-pause-btn:hover {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/pause.png);
 }
 
 #talking-gmail-controller-pause-btn.paused {
-  color: red;  /*TODO*/
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/play_lt.png);
+}
+
+#talking-gmail-controller-pause-btn.paused:hover {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/ui/play.png);
 }
 
 #talking-gmail-controller-logo {
@@ -76,5 +102,8 @@
   text-align: center;
   height: 24px;
   line-height: 24px;
+  color: #444;
+  background-color: #F7F7F7;
+  box-shadow: inset 0 4px 3px -3px rgba(0, 0, 0, .2);
   /*padding-left: 16px;*/
 }

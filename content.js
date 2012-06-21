@@ -136,7 +136,7 @@ var view = (function() {
       .appendTo($btn);
     var $d1 = $('<div />')
       .addClass('cj')
-      .html(chrome.i18n.getMessage('btnText'))
+      .html(chrome.i18n.getMessage('menuBtnText'))
       .appendTo($d0);
 
     $btn.appendTo($menu);
@@ -341,28 +341,36 @@ var view = (function() {
         .html('pr')
         .addClass(conf.btnClass)
         .addClass(conf.btnLeftClass)
-        .attr('id', conf.prevBtnId)
-        .appendTo($btnWrapper);
+        .attr({
+          id: conf.prevBtnId,
+          'data-tooltip': chrome.i18n.getMessage('btnTooltipPrev')
+        }).appendTo($btnWrapper);
       $stopBtn = $('<div />')
         .html('st')
         .addClass(conf.btnClass)
         .addClass(conf.btnLeftClass)
         .addClass(conf.btnRightClass)
-        .attr('id', conf.stopBtnId)
-        .appendTo($btnWrapper);
+        .attr({
+          id: conf.stopBtnId,
+          'data-tooltip': chrome.i18n.getMessage('btnTooltipStop')
+        }).appendTo($btnWrapper);
       $pauseBtn = $('<div />')
         .html('ps')
         .addClass(conf.btnClass)
         .addClass(conf.btnLeftClass)
         .addClass(conf.btnRightClass)
-        .attr('id', conf.pauseBtnId)
-        .appendTo($btnWrapper);
+        .attr({
+          id: conf.pauseBtnId,
+          'data-tooltip': chrome.i18n.getMessage('btnTooltipPause')
+        }).appendTo($btnWrapper);
       $nextBtn = $('<div />')
         .html('nx')
         .addClass(conf.btnClass)
         .addClass(conf.btnRightClass)
-        .attr('id', conf.nextBtnId)
-        .appendTo($btnWrapper);
+        .attr({
+          id: conf.nextBtnId,
+          'data-tooltip': chrome.i18n.getMessage('btnTooltipNext')
+        }).appendTo($btnWrapper);
 
       $logo = $('<div />')
         .attr('id', conf.ctrlerLogoId)
@@ -390,11 +398,15 @@ var view = (function() {
         var $this = $(this);
         if (isPaused) {
           isPaused = false;
-          $this.removeClass('paused');
+          $this
+            .removeClass('paused')
+            .attr('data-tooltip', chrome.i18n.getMessage('btnTooltipPause'));
           reader.resume();
         } else {
           isPaused = true;
-          $this.addClass('paused');
+          $this
+            .addClass('paused')
+            .attr('data-tooltip', chrome.i18n.getMessage('btnTooltipResume'));
           reader.pause();
         }
       }).on('click', '#' + conf.stopBtnId, function() {
