@@ -58,7 +58,7 @@ var TextObj = function(text, id) {
   };
 
   this.isEmpty = function() {
-    return priv.text.length === 0;
+    return $.trim(priv.text).length === 0;
   };
 };
 
@@ -231,6 +231,7 @@ var view = (function() {
     var contents = $mail.contents();
     var $newMail = $('<div />');
 
+    var textObj = new TextObj;
     var dfs = function(ele, $parent, isLast) {
       if (ele.nodeName === '#text') {
         var textEleId = getTextElementId();
@@ -239,15 +240,23 @@ var view = (function() {
           .addClass(conf.readingClass + ' ' + conf.textClass)
           .html(ele.data)
           .appendTo($parent);
-        if ($.trim(ele.data).length > 0) {
-          reader.push(new TextObj(ele.data, textEleId));
-        }
+        textObj
+          .addText(ele.data)
+          .addId(textEleId);
       } else {
         var $ele = $(ele);
         if (isQuoteEle($ele) || !$ele.is(':visible')) {
           // Mute this node
           $ele.appendTo($parent);
         } else {
+          // Push textObj if $ele is a block element
+          if ($ele.is('div, p, blockquote, pre, table, dl, ul, ol, li, hr, h1, h2, h3, h4, h5, h6')) {
+            if (!textObj.isEmpty()) {
+              reader.push(textObj);
+            }
+            textObj = new TextObj;
+          }
+
           // Audible node, go on with dfs
           var eleContents = $ele.contents();
           var $newParent = $ele.clone().empty().appendTo($parent);
@@ -258,6 +267,9 @@ var view = (function() {
         }
       }
       if (isLast) {
+        if (!textObj.isEmpty()) {
+          reader.push(textObj);
+        }
         $mail
           .empty()
           .append($newMail.children());
@@ -290,7 +302,7 @@ var view = (function() {
   };
 
   obj.clearHighlight = function() {
-    $frameContents.find('.' + conf.textClass)
+    $frameContents && $frameContents.find('.' + conf.textClass)
       .removeClass(conf.hiltClass)
       .removeClass(conf.readingClass);
     return this;
@@ -338,7 +350,6 @@ var view = (function() {
         .attr('id', conf.btnWrapperId)
         .appendTo($ctrler);
       $prevBtn = $('<div />')
-        .html('pr')
         .addClass(conf.btnClass)
         .addClass(conf.btnLeftClass)
         .attr({
@@ -346,7 +357,6 @@ var view = (function() {
           'data-tooltip': chrome.i18n.getMessage('btnTooltipPrev')
         }).appendTo($btnWrapper);
       $stopBtn = $('<div />')
-        .html('st')
         .addClass(conf.btnClass)
         .addClass(conf.btnLeftClass)
         .addClass(conf.btnRightClass)
@@ -355,7 +365,6 @@ var view = (function() {
           'data-tooltip': chrome.i18n.getMessage('btnTooltipStop')
         }).appendTo($btnWrapper);
       $pauseBtn = $('<div />')
-        .html('ps')
         .addClass(conf.btnClass)
         .addClass(conf.btnLeftClass)
         .addClass(conf.btnRightClass)
@@ -364,7 +373,6 @@ var view = (function() {
           'data-tooltip': chrome.i18n.getMessage('btnTooltipPause')
         }).appendTo($btnWrapper);
       $nextBtn = $('<div />')
-        .html('nx')
         .addClass(conf.btnClass)
         .addClass(conf.btnRightClass)
         .attr({
@@ -391,16 +399,19 @@ var view = (function() {
       });
 
       $wrapper.on('click', '#' + conf.prevBtnId, function() {
+        if (isPaused) {
+          resumeView();
+        }
         reader.prev();
       }).on('click', '#' + conf.nextBtnId, function() {
+        if (isPaused) {
+          resumeView();
+        }
         reader.next();
       }).on('click', '#' + conf.pauseBtnId, function() {
         var $this = $(this);
         if (isPaused) {
-          isPaused = false;
-          $this
-            .removeClass('paused')
-            .attr('data-tooltip', chrome.i18n.getMessage('btnTooltipPause'));
+          resumeView();
           reader.resume();
         } else {
           isPaused = true;
@@ -410,11 +421,21 @@ var view = (function() {
           reader.pause();
         }
       }).on('click', '#' + conf.stopBtnId, function() {
+        if (isPaused) {
+          resumeView();
+        }
         reader.stop();
       });
 
       $wrapper.appendTo($mailViewWrapper);
       return this;
+    };
+
+    var resumeView = function() {
+      isPaused = false;
+      $pauseBtn
+        .removeClass('paused')
+        .attr('data-tooltip', chrome.i18n.getMessage('btnTooltipPause'));
     };
 
     obj.show = function() {
