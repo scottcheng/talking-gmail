@@ -105,5 +105,10 @@
   color: #444;
   background-color: #F7F7F7;
   box-shadow: inset 0 4px 3px -3px rgba(0, 0, 0, .2);
+  opacity: .7;
   /*padding-left: 16px;*/
+}
+
+#talking-gmail-controller:hover #talking-gmail-controller-logo {
+  opacity: 1;
 }
