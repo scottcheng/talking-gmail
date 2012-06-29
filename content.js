@@ -441,7 +441,7 @@ var view = (function() {
 
     var resumeView = function() {
       isPaused = false;
-      $pauseBtn
+      $pauseBtn && $pauseBtn
         .removeClass('paused')
         .attr('data-tooltip', chrome.i18n.getMessage('btnTooltipPause'));
     };
@@ -454,6 +454,7 @@ var view = (function() {
 
     obj.remove = function() {
       $wrapper && $wrapper.removeClass('expanded visible');
+      resumeView();
       return this;
     };
 
