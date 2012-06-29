@@ -30,8 +30,32 @@ var msgListeners = {
 };
 
 var reqListeners = {
-  visitMail: function(opt, sender) {
-    _gaq.push(['_trackEvent', 'Mail', 'visit']);
+  visitGmail: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Gmail', 'visit']);
+  },
+  readTextMail: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Reader', 'readTextMail']);
+  },
+  readHTMLMail: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Reader', 'readHTMLMail']);
+  },
+  startReading: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Reader', 'startReading']);
+  },
+  ctrlerPrev: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Controller', 'previous']);
+  },
+  ctrlerNext: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Controller', 'next']);
+  },
+  ctrlerResume: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Controller', 'resume']);
+  },
+  ctrlerPause: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Controller', 'pause']);
+  },
+  ctrlerStop: function(opt, sender) {
+    _gaq.push(['_trackEvent', 'Controller', 'stop']);
   }
 };
 

@@ -182,6 +182,10 @@ var view = (function() {
   };
 
   var readTextMail = function($mail) {
+    chrome.extension.sendRequest({
+      e: 'readTextMail'
+    });
+
     // Replace all text nodes with spans, and send them to reader
     // Other elements are put back as they were
 
@@ -234,6 +238,10 @@ var view = (function() {
   };
 
   var readHTMLMail = function($mail) {
+    chrome.extension.sendRequest({
+      e: 'readHTMLMail'
+    });
+
     // DFS all nodes in $mail, replace text nodes with spans
 
     var contents = $mail.contents();
@@ -407,11 +415,19 @@ var view = (function() {
       });
 
       $wrapper.on('click', '#' + conf.prevBtnId, function() {
+        chrome.extension.sendRequest({
+          e: 'ctrlerPrev'
+        });
+
         if (isPaused) {
           resumeView();
         }
         reader.prev();
       }).on('click', '#' + conf.nextBtnId, function() {
+        chrome.extension.sendRequest({
+          e: 'ctrlerNext'
+        });
+
         if (isPaused) {
           resumeView();
         }
@@ -419,9 +435,17 @@ var view = (function() {
       }).on('click', '#' + conf.pauseBtnId, function() {
         var $this = $(this);
         if (isPaused) {
+          chrome.extension.sendRequest({
+            e: 'ctrlerResume'
+          });
+
           resumeView();
           reader.resume();
         } else {
+          chrome.extension.sendRequest({
+            e: 'ctrlerPause'
+          });
+
           isPaused = true;
           $this
             .addClass('paused')
@@ -429,6 +453,10 @@ var view = (function() {
           reader.pause();
         }
       }).on('click', '#' + conf.stopBtnId, function() {
+        chrome.extension.sendRequest({
+          e: 'ctrlerStop'
+        });
+
         if (isPaused) {
           resumeView();
         }
@@ -532,6 +560,9 @@ var reader = (function() {
   };
 
   obj.startReading = function() {
+    chrome.extension.sendRequest({
+      e: 'startReading'
+    });
     view.ctrler.show();
     initPort();
     readQueue(0);
@@ -599,7 +630,7 @@ var reader = (function() {
 })();
 
 chrome.extension.sendRequest({
-  e: 'visitMail'
+  e: 'visitGmail'
 });
 
 view.init();
