@@ -5,7 +5,11 @@ A Chrome extension that reads your Gmail™ messages for you.
 
 See in [Chrome Web Store](https://chrome.google.com/webstore/detail/mipelndpcphlakhnncbjcfiemcglkmde)
 
+Released under the MIT license.
+
+
 - - - - -
+
 
 Sit back, listen.
 
