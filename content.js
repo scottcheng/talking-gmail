@@ -3,6 +3,7 @@
 
 var conf = {
   btnId: 'talking-gmail-btn',
+  btnImgId: 'talking-gmail-btn-img',
   textClass: 'talking-gmail-text',
   readingClass: 'talking-gmail-reading',
   hiltClass: 'talking-gmail-highlight',
@@ -138,6 +139,13 @@ var view = (function() {
       .addClass('cj')
       .html(chrome.i18n.getMessage('menuBtnText'))
       .appendTo($d0);
+    var $icon = $('<img />')
+      .attr({
+        id: conf.btnImgId,
+        src: 'images/cleardot.gif'
+      })
+      .addClass('f4 J-N-JX')
+      .prependTo($d1);
 
     $btn.appendTo($menu);
   };
