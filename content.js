@@ -1,6 +1,3 @@
-// Talking Gmail by Scott Cheng
-// Content script
-
 var conf = {
   btnId: 'talking-gmail-btn',
   btnImgId: 'talking-gmail-btn-img',
