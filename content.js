@@ -115,6 +115,9 @@ var view = (function() {
       onHashchange();
       reader.onHashchange();
     });
+    $(window).unload(function() {
+      reader.stop();
+    });
 
     return this;
   };
