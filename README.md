@@ -25,13 +25,17 @@ Features
 FAQ
 ----
 
-Q: I do not see the "read this message" button!
-A: After installing Talking Gmail, you will need to *refresh* the Gmail tab (or open a new one) so that the Talking Gmail script is up and running and the button is added to the Gmail interface.
+Q: I do not see the "read this message" button!  
+A: After installing Talking Gmail, you will need to *reload* the Gmail tab (or open a new one) so that the Talking Gmail script is up and running and the button is added to the Gmail interface. This will make sure the button is there. If you still cannot find it, try the following:
 
-Q: It does not read in my language!
+1. First find the "reply" button on the top right corner of each Gmail message (besides the date and the star).
+2. Then click on the little triangle besides it. You should see a drop down menu of "reply", "reply to all", "forward", etc.
+3. On the bottom of this drop down menu, there is the "read this message" button. Click on it and start listening :)
+
+Q: It does not read in my language!  
 A: Talking Gmail uses Chrome's built in text-to-speech engine, which may not support all languages, depending on your Chrome version and operating system.
 
-Q: It does not work with Gmail offline app.
+Q: It does not work with Gmail offline app.  
 A: That's correct - Talking Gmail does not currently support the offline Gmail app, but this feature will be included in the future releases.
 
 
