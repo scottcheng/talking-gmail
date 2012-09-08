@@ -1,7 +1,7 @@
 Talking Gmail
 ====
 
-Talking Gmail is a Chrome extension that reads your Gmail messages for you. See in [Chrome Web Store](https://chrome.google.com/webstore/detail/mipelndpcphlakhnncbjcfiemcglkmde).
+Talking Gmail is a Chrome extension that reads your Gmail messages for you. See in [Chrome Web Store](https://chrome.google.com/webstore/detail/cgbcmpomlglaoledgjlnamdfgfghflan).
 
 Released under the MIT license.
 
