@@ -37,9 +37,3 @@ A: Talking Gmail uses Chrome's built in text-to-speech engine, which may not sup
 
 Q: It does not work with Gmail offline app.  
 A: That's correct - Talking Gmail does not currently support the offline Gmail app, but this feature will be included in the future releases.
-
-
-Privacy
-----
-
-Talking Gmail does *not* record any personal information from your Gmail.
