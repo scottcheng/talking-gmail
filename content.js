@@ -73,9 +73,10 @@ var view = (function() {
 
   obj.init = function() {
     var self = this;
-    var $frame = $('#canvas_frame');
+    // var $frame = $('#canvas_frame');
+    var $frame = $(document);
 
-    $frame.ready(function() {
+    // $frame.ready(function() {
       $frameContents = $frame.contents();
 
       // Insert css
@@ -109,7 +110,7 @@ var view = (function() {
       }).on('mouseleave', '#' + conf.btnId, function() {
         $(this).removeClass('J-N-JT');
       });
-    });
+    // });
 
     window.addEventListener('hashchange', function() {
       onHashchange();
